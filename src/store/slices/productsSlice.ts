@@ -6,8 +6,14 @@ export interface Product {
   name: string;
   price: number;
   description: string;
-  category: 'jersey' | 'jaket' | 'aksesoris' | 'sparepart';
+  categoryId: number | null;
+  categoryData?: {
+    id: number;
+    name: string;
+    slug: string;
+  };
   stock: number;
+  whatsapp_number: string | null;
   image: string | null;
   createdAt?: string;
   updatedAt?: string;

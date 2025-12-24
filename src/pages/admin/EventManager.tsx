@@ -27,6 +27,7 @@ const EventManager = () => {
     description: "",
     date: "",
     location: "",
+    registration_link: "",
     image: null as File | null,
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -50,6 +51,7 @@ const EventManager = () => {
       description: event.description,
       date: event.date.split('T')[0],
       location: event.location,
+      registration_link: event.registration_link || "",
       image: null,
     });
     setImagePreview(event.image);
@@ -63,6 +65,7 @@ const EventManager = () => {
     formDataToSend.append("description", formData.description);
     formDataToSend.append("date", formData.date);
     formDataToSend.append("location", formData.location);
+    formDataToSend.append("registration_link", formData.registration_link);
     if (formData.image) {
       formDataToSend.append("image", formData.image);
     }
@@ -83,7 +86,7 @@ const EventManager = () => {
       }
       setShowForm(false);
       setEditId(null);
-      setFormData({ title: "", description: "", date: "", location: "", image: null });
+      setFormData({ title: "", description: "", date: "", location: "", registration_link: "", image: null });
       setImagePreview(null);
     } catch (error: any) {
       toast({
@@ -115,7 +118,7 @@ const EventManager = () => {
   const resetForm = () => {
     setShowForm(false);
     setEditId(null);
-    setFormData({ title: "", description: "", date: "", location: "", image: null });
+    setFormData({ title: "", description: "", date: "", location: "", registration_link: "", image: null });
     setImagePreview(null);
   };
 
@@ -164,13 +167,13 @@ const EventManager = () => {
                   <div className="space-y-2">
                     <Label className="placeholder-white" color="white" htmlFor="date">Tanggal Event</Label>
                     <Input
-  className="text-white placeholder-white"
-  id="date"
-  type="date"
-  value={formData.date}
-  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-  required
-/>
+                      className="text-white placeholder-white"
+                      id="date"
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      required
+                    />
 
                   </div>
                   <div className="space-y-2">
@@ -180,6 +183,15 @@ const EventManager = () => {
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="registration_link">Link Registrasi</Label>
+                    <Input
+                      id="registration_link"
+                      value={formData.registration_link}
+                      onChange={(e) => setFormData({ ...formData, registration_link: e.target.value })}
+                      placeholder="Google Form URL"
                     />
                   </div>
                   <div className="space-y-2">

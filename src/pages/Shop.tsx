@@ -8,31 +8,31 @@ import { ShoppingCart, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchProducts } from "@/store/slices/productsSlice";
+import { fetchCategories } from "@/store/slices/categoriesSlice";
 
 const Shop = () => {
   const dispatch = useAppDispatch();
   const { products, loading } = useAppSelector((state) => state.products);
+  const { categories } = useAppSelector((state) => state.categories);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   useEffect(() => {
     dispatch(fetchProducts(undefined));
+    dispatch(fetchCategories());
   }, [dispatch]);
 
-  const categories = [
+  const categoryOptions = [
     { value: "all", label: "Semua Produk" },
-    { value: "jersey", label: "Jersey" },
-    { value: "jaket", label: "Jaket" },
-    { value: "aksesoris", label: "Aksesoris" },
-    { value: "sparepart", label: "Sparepart" },
+    ...categories.map(c => ({ value: c.id.toString(), label: c.name }))
   ];
 
   const filteredProducts =
     selectedCategory === "all"
       ? products
-      : products.filter((p) => p.category === selectedCategory);
+      : products.filter((p) => p.categoryId?.toString() === selectedCategory);
 
   const handleBuyClick = (product: typeof products[0]) => {
-    const waNumber = "6281234567890"; // Ganti dengan nomor WA club
+    const waNumber = product.whatsapp_number || "6281234567890";
     const message = `Halo, saya tertarik untuk membeli *${product.name}* seharga Rp ${product.price.toLocaleString("id-ID")}`;
     const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank");
@@ -61,7 +61,7 @@ const Shop = () => {
 
           {/* Category Filter */}
           <div className="flex flex-wrap gap-4 justify-center mb-12">
-            {categories.map((category) => (
+            {categoryOptions.map((category) => (
               <Button
                 key={category.value}
                 variant={selectedCategory === category.value ? "default" : "outline"}

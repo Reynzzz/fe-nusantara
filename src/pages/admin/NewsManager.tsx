@@ -26,6 +26,7 @@ const NewsManager = () => {
     title: "",
     excerpt: "",
     content: "",
+    external_link: "",
     date: "",
     image: null as File | null,
   });
@@ -49,6 +50,7 @@ const NewsManager = () => {
       title: item.title,
       excerpt: item.excerpt,
       content: item.content,
+      external_link: item.external_link || "",
       date: item.date.split('T')[0],
       image: null,
     });
@@ -62,6 +64,7 @@ const NewsManager = () => {
     formDataToSend.append("title", formData.title);
     formDataToSend.append("excerpt", formData.excerpt);
     formDataToSend.append("content", formData.content);
+    formDataToSend.append("external_link", formData.external_link || "");
     formDataToSend.append("date", formData.date || new Date().toISOString());
     if (formData.image) {
       formDataToSend.append("image", formData.image);
@@ -83,7 +86,7 @@ const NewsManager = () => {
       }
       setShowForm(false);
       setEditId(null);
-      setFormData({ title: "", excerpt: "", content: "", date: "", image: null });
+      setFormData({ title: "", excerpt: "", content: "", external_link: "", date: "", image: null });
       setImagePreview(null);
     } catch (error: any) {
       toast({
@@ -115,7 +118,7 @@ const NewsManager = () => {
   const resetForm = () => {
     setShowForm(false);
     setEditId(null);
-    setFormData({ title: "", excerpt: "", content: "", date: "", image: null });
+    setFormData({ title: "", excerpt: "", content: "", external_link: "", date: "", image: null });
     setImagePreview(null);
   };
 
@@ -168,6 +171,15 @@ const NewsManager = () => {
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="external_link">Link Eksternal (Opsional)</Label>
+                    <Input
+                      id="external_link"
+                      value={formData.external_link}
+                      onChange={(e) => setFormData({ ...formData, external_link: e.target.value })}
+                      placeholder="https://sumber-berita.com"
                     />
                   </div>
                   <div className="space-y-2">

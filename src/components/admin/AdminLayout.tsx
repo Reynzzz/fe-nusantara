@@ -22,6 +22,11 @@ const menuItems = [
     icon: Home,
   },
   {
+    title: "Kelola Home",
+    url: "/admin/home",
+    icon: Home,
+  },
+  {
     title: "Kelola News",
     url: "/admin/news",
     icon: Newspaper,
@@ -35,6 +40,11 @@ const menuItems = [
     title: "Kelola Produk",
     url: "/admin/products",
     icon: ShoppingBag,
+  },
+  {
+    title: "Kategori Produk",
+    url: "/admin/categories",
+    icon: Flag,
   },
   {
     title: "Halaman Tentang",
@@ -79,7 +89,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <div className="p-4 border-b border-border">
               <h2 className="text-lg font-bold text-gold">Admin Panel</h2>
             </div>
-            
+
             <SidebarGroup>
               <SidebarGroupLabel>Menu</SidebarGroupLabel>
               <SidebarGroupContent>

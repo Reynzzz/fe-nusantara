@@ -15,11 +15,13 @@ import {
   updateProduct,
   deleteProduct,
 } from "@/store/slices/productsSlice";
+import { fetchCategories } from "@/store/slices/categoriesSlice";
 import { useToast } from "@/hooks/use-toast";
 
 const ProductManager = () => {
   const dispatch = useAppDispatch();
   const { products, loading } = useAppSelector((state) => state.products);
+  const { categories } = useAppSelector((state) => state.categories);
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -27,14 +29,16 @@ const ProductManager = () => {
     name: "",
     price: "",
     description: "",
-    category: "",
+    categoryId: "",
     stock: "",
+    whatsapp_number: "",
     image: null as File | null,
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchProducts(undefined));
+    dispatch(fetchCategories());
   }, [dispatch]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,8 +55,9 @@ const ProductManager = () => {
       name: product.name,
       price: product.price.toString(),
       description: product.description,
-      category: product.category,
+      categoryId: product.categoryId ? product.categoryId.toString() : "",
       stock: product.stock.toString(),
+      whatsapp_number: product.whatsapp_number || "",
       image: null,
     });
     setImagePreview(product.image);
@@ -65,8 +70,11 @@ const ProductManager = () => {
     formDataToSend.append("name", formData.name);
     formDataToSend.append("price", formData.price);
     formDataToSend.append("description", formData.description);
-    formDataToSend.append("category", formData.category);
+    if (formData.categoryId) {
+      formDataToSend.append("categoryId", formData.categoryId);
+    }
     formDataToSend.append("stock", formData.stock);
+    formDataToSend.append("whatsapp_number", formData.whatsapp_number);
     if (formData.image) {
       formDataToSend.append("image", formData.image);
     }
@@ -87,7 +95,7 @@ const ProductManager = () => {
       }
       setShowForm(false);
       setEditId(null);
-      setFormData({ name: "", price: "", description: "", category: "", stock: "", image: null });
+      setFormData({ name: "", price: "", description: "", categoryId: "", stock: "", whatsapp_number: "", image: null });
       setImagePreview(null);
     } catch (error: any) {
       toast({
@@ -119,7 +127,7 @@ const ProductManager = () => {
   const resetForm = () => {
     setShowForm(false);
     setEditId(null);
-    setFormData({ name: "", price: "", description: "", category: "", stock: "", image: null });
+    setFormData({ name: "", price: "", description: "", categoryId: "", stock: "", whatsapp_number: "", image: null });
     setImagePreview(null);
   };
 
@@ -178,17 +186,18 @@ const ProductManager = () => {
                   <div className="space-y-2">
                     <Label htmlFor="category">Kategori</Label>
                     <Select
-                      value={formData.category}
-                      onValueChange={(value) => setFormData({ ...formData, category: value })}
+                      value={formData.categoryId}
+                      onValueChange={(value) => setFormData({ ...formData, categoryId: value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih kategori" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="jersey">Jersey</SelectItem>
-                        <SelectItem value="jaket">Jaket</SelectItem>
-                        <SelectItem value="aksesoris">Aksesoris</SelectItem>
-                        <SelectItem value="sparepart">Sparepart</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -200,6 +209,15 @@ const ProductManager = () => {
                       value={formData.stock}
                       onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                       required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="whatsapp_number">Nomor WhatsApp</Label>
+                    <Input
+                      id="whatsapp_number"
+                      value={formData.whatsapp_number}
+                      onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                      placeholder="628123456789"
                     />
                   </div>
                   <div className="space-y-2">
@@ -256,7 +274,10 @@ const ProductManager = () => {
                       <p className="text-gold font-semibold mt-1">
                         Rp {product.price.toLocaleString('id-ID')}
                       </p>
-                      <p className="text-sm text-muted-foreground">Stok: {product.stock}</p>
+                      <p className="text-sm text-muted-foreground bg-secondary/50 inline-block px-2 py-1 rounded mt-2">
+                        {product.categoryData?.name || 'Uncategorized'}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">Stok: {product.stock}</p>
                     </div>
                   </div>
                   <div className="flex space-x-2">

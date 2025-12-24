@@ -25,6 +25,8 @@ export interface AboutContent {
   mission_title: string;
   mission_text: string;
   values: Value[];
+  member_benefits: string[];
+  member_registration_link: string;
   management: Management[];
   contact_phone: string;
   contact_email: string;

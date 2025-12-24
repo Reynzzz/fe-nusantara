@@ -4,6 +4,8 @@ import newsReducer from './slices/newsSlice';
 import productsReducer from './slices/productsSlice';
 import aboutReducer from './slices/aboutSlice';
 import milestonesReducer from './slices/milestoneSlice';
+import homeReducer from './slices/homeSlice';
+import categoriesReducer from './slices/categoriesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ export const store = configureStore({
     products: productsReducer,
     about: aboutReducer,
     milestones: milestonesReducer,
+    home: homeReducer,
+    categories: categoriesReducer,
   },
 });
 

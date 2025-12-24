@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 
 
@@ -18,11 +18,11 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   try {
     const response = await fetch(url, config);
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || 'Something went wrong');
     }
-    
+
     return data;
   } catch (error) {
     console.error('API Error:', error);
@@ -101,6 +101,20 @@ export const aboutAPI = {
   },
 };
 
+// Categories API
+export const categoriesAPI = {
+  getAll: () => apiRequest('/categories'),
+  create: (name: string) => apiRequest('/categories', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  }),
+  update: (id: number, name: string) => apiRequest(`/categories/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ name }),
+  }),
+  delete: (id: number) => apiRequest(`/categories/${id}`, { method: 'DELETE' }),
+};
+
 // Gallery API
 export const galleryAPI = {
   getAll: () => apiRequest('/gallery'),
@@ -137,6 +151,17 @@ export const milestonesAPI = {
     }).then(res => res.json());
   },
   delete: (id: number) => apiRequest(`/milestones/${id}`, { method: 'DELETE' }),
+};
+
+// Home API
+export const homeAPI = {
+  get: () => apiRequest('/home'),
+  update: (formData: FormData) => {
+    return fetch(`${API_BASE_URL}/home`, {
+      method: 'PUT',
+      body: formData,
+    }).then(res => res.json());
+  },
 };
 
 // Helper untuk mendapatkan full image URL

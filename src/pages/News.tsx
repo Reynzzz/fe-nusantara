@@ -218,6 +218,18 @@ const News = () => {
                 />
               )}
               <p className="text-muted-foreground">{selectedNews.content}</p>
+              {selectedNews.external_link && (
+                <div className="mt-4">
+                  <a
+                    href={selectedNews.external_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-gold hover:underline"
+                  >
+                    Baca selengkapnya di sumber asli <ArrowRight className="ml-2" size={16} />
+                  </a>
+                </div>
+              )}
               <DialogClose className="mt-4 btn btn-sm">Tutup</DialogClose>
             </>
           )}

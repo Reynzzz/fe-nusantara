@@ -7,6 +7,7 @@ export interface Event {
   description: string;
   date: string;
   location: string;
+  registration_link: string | null;
   image: string | null;
   createdAt?: string;
   updatedAt?: string;

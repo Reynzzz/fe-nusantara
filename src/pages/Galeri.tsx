@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Play, X } from "lucide-react";
+import { Play, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { galleryAPI, getImageUrl } from "@/services/api";
 
@@ -34,10 +34,6 @@ export default function Galeri() {
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchGallery();
-  }, []);
-
   const fetchGallery = async () => {
     try {
       const res = await galleryAPI.getAll();
@@ -47,9 +43,40 @@ export default function Galeri() {
     }
   };
 
+  useEffect(() => {
+    fetchGallery();
+  }, []);
+
   const filtered = galleryItems.filter((item) =>
     filter === "all" ? true : item.type === filter
   );
+
+  const handleNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!selectedItem) return;
+    const currentIndex = filtered.findIndex((item) => item.id === selectedItem.id);
+    const nextIndex = (currentIndex + 1) % filtered.length;
+    setSelectedItem(filtered[nextIndex]);
+  };
+
+  const handlePrev = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!selectedItem) return;
+    const currentIndex = filtered.findIndex((item) => item.id === selectedItem.id);
+    const prevIndex = (currentIndex - 1 + filtered.length) % filtered.length;
+    setSelectedItem(filtered[prevIndex]);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedItem) return;
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "ArrowLeft") handlePrev();
+      if (e.key === "Escape") setSelectedItem(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedItem, filtered]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,10 +96,9 @@ export default function Galeri() {
               key={t}
               onClick={() => setFilter(t as any)}
               className={`px-6 py-2 rounded-full transition border 
-                ${
-                  filter === t
-                    ? "bg-gold text-background"
-                    : "bg-card text-foreground hover:bg-gold/20"
+            ${filter === t
+                  ? "bg-gold text-background"
+                  : "bg-card text-foreground hover:bg-gold/20"
                 }`}
             >
               {t === "all" ? "Semua" : t === "image" ? "Foto" : "Video"}
@@ -104,8 +130,7 @@ export default function Galeri() {
                     if (item.type === "video") {
                       const id = getYouTubeId(item.url);
                       if (id)
-                        (e.currentTarget as HTMLImageElement).src =
-                          `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+                        (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
                     }
                   }}
                   className="w-full h-full object-cover transition duration-300 group-hover:brightness-75"
@@ -145,11 +170,23 @@ export default function Galeri() {
       <AnimatePresence>
         {selectedItem && (
           <motion.div
-            className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             onClick={() => setSelectedItem(null)}
           >
+            <button
+              className="absolute left-4 z-50 p-2 bg-black/50 text-white rounded-full hover:bg-white/20 transition"
+              onClick={handlePrev}
+            >
+              <ChevronLeft size={32} />
+            </button>
+            <button
+              className="absolute right-4 z-50 p-2 bg-black/50 text-white rounded-full hover:bg-white/20 transition"
+              onClick={handleNext}
+            >
+              <ChevronRight size={32} />
+            </button>
             <motion.div
               className="max-w-4xl bg-card rounded-lg overflow-hidden"
               initial={{ scale: 0.9 }}

@@ -21,6 +21,8 @@ import ProductManager from "./pages/admin/ProductManager";
 import AboutManager from "./pages/admin/AboutManager";
 import GalleryManager from "./pages/admin/GalleryManager";
 import MilestoneManager from "./pages/admin/MilestoneManager";
+import HomeManager from "./pages/admin/HomeManager";
+import CategoryManager from "./pages/admin/CategoryManager";
 
 const App = () => (
   <Provider store={store}>
@@ -37,16 +39,18 @@ const App = () => (
           <Route path="/event" element={<Event />} />
           <Route path="/galeri" element={<Galeri />} />
           <Route path="/member" element={<Member />} />
-          
+
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/news" element={<NewsManager />} />
           <Route path="/admin/events" element={<EventManager />} />
           <Route path="/admin/products" element={<ProductManager />} />
+          <Route path="/admin/categories" element={<CategoryManager />} />
           <Route path="/admin/about" element={<AboutManager />} />
           <Route path="/admin/gallery" element={<GalleryManager />} />
           <Route path="/admin/milestones" element={<MilestoneManager />} />
+          <Route path="/admin/home" element={<HomeManager />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

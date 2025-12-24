@@ -24,8 +24,8 @@ const Event = () => {
   );
   const pastEvents = events.filter((event) => new Date(event.date) < now);
 
-  const handleRegisterClick = () => {
-    const googleFormUrl = "https://forms.gle/example"; // Ganti dengan link Google Form sebenarnya
+  const handleRegisterClick = (link?: string) => {
+    const googleFormUrl = link || "https://forms.gle/example";
     window.open(googleFormUrl, "_blank");
   };
 
@@ -60,7 +60,7 @@ const Event = () => {
               <p className="text-xl md:text-2xl text-foreground mb-8">
                 Bergabunglah dalam berbagai kegiatan seru dan berkesan bersama kami
               </p>
-              <Button size="lg" className="text-lg px-8 py-6" onClick={handleRegisterClick}>
+              <Button size="lg" className="text-lg px-8 py-6" onClick={() => handleRegisterClick()}>
                 <ExternalLink className="mr-2 h-5 w-5" />
                 Daftar Event Sekarang
               </Button>
@@ -125,7 +125,7 @@ const Event = () => {
                         <MapPin className="mr-2 h-4 w-4 text-gold" />
                         <span>{event.location}</span>
                       </div>
-                      <Button className="w-full mt-4" onClick={handleRegisterClick}>
+                      <Button className="w-full mt-4" onClick={() => handleRegisterClick(event.registration_link || undefined)}>
                         <ExternalLink className="mr-2 h-4 w-4" />
                         Daftar Sekarang
                       </Button>

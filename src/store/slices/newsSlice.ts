@@ -7,6 +7,7 @@ export interface News {
   excerpt: string;
   content: string;
   image: string | null;
+  external_link: string | null;
   date: string;
   createdAt?: string;
   updatedAt?: string;

@@ -2,13 +2,24 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Users, CheckCircle2 } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useEffect } from "react";
+import { fetchAbout } from "@/store/slices/aboutSlice";
 
 const Member = () => {
+  const dispatch = useAppDispatch();
+  const { content: aboutContent } = useAppSelector((state) => state.about);
+
+  useEffect(() => {
+    dispatch(fetchAbout());
+  }, [dispatch]);
+
   // Google Form terbaru
   const googleFormUrl =
+    aboutContent?.member_registration_link ||
     "https://docs.google.com/forms/d/e/1FAIpQLSf6cFzWrYCfuCNO2qq6mEL2Qx3JElqM5JFpdJ0yQ25SzUetUg/viewform";
 
-  const benefits = [
+  const defaultBenefits = [
     "Akses ke semua event club",
     "Diskon khusus di merchandise shop",
     "Networking dengan member lainnya",
@@ -16,6 +27,11 @@ const Member = () => {
     "Kesempatan riding bersama",
     "Dukungan komunitas yang solid",
   ];
+
+  const benefits =
+    aboutContent?.member_benefits && aboutContent.member_benefits.length > 0
+      ? aboutContent.member_benefits
+      : defaultBenefits;
 
   return (
     <div className="min-h-screen bg-background">
