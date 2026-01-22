@@ -28,6 +28,8 @@ const MilestoneManager = () => {
     title: "",
     description: "",
     achievementsText: "",
+    event_tahunan: "",
+    perhargaan: "",
     image: null as File | null,
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -51,6 +53,8 @@ const MilestoneManager = () => {
       title: item.title,
       description: item.description,
       achievementsText: item.achievements.join("\n"),
+      event_tahunan: item.event_tahunan || "",
+      perhargaan: item.perhargaan || "",
       image: null,
     });
     setImagePreview(item.image || null);
@@ -65,6 +69,8 @@ const MilestoneManager = () => {
       title: "",
       description: "",
       achievementsText: "",
+      event_tahunan: "",
+      perhargaan: "",
       image: null,
     });
     setImagePreview(null);
@@ -81,6 +87,12 @@ const MilestoneManager = () => {
       .map((item) => item.trim())
       .filter(Boolean);
     payload.append("achievements", JSON.stringify(achievementsArray));
+    if (formData.event_tahunan) {
+      payload.append("event_tahunan", formData.event_tahunan);
+    }
+    if (formData.perhargaan) {
+      payload.append("perhargaan", formData.perhargaan);
+    }
     if (formData.image) {
       payload.append("image", formData.image);
     }
@@ -189,6 +201,7 @@ const MilestoneManager = () => {
                       placeholder={"Pembukaan chapter baru\nEvent nasional\nProgram sosial"}
                     />
                   </div>
+                 
                   <div className="space-y-2">
                     <Label htmlFor="image">Gambar</Label>
                     <Input id="image" type="file" accept="image/*" onChange={handleImageChange} />

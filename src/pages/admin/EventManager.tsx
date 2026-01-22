@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -14,13 +14,16 @@ import {
   updateEvent,
   deleteEvent,
 } from "@/store/slices/eventsSlice";
+import { fetchAbout, updateAbout } from "@/store/slices/aboutSlice";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "lucide-react";
 const EventManager = () => {
   const dispatch = useAppDispatch();
   const { events, loading } = useAppSelector((state) => state.events);
+  const { content: aboutContent } = useAppSelector((state) => state.about);
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [showBackgroundForm, setShowBackgroundForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -30,10 +33,13 @@ const EventManager = () => {
     registration_link: "",
     image: null as File | null,
   });
+  const [eventBackgroundImage, setEventBackgroundImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [backgroundImagePreview, setBackgroundImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchEvents());
+    dispatch(fetchAbout());
   }, [dispatch]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +47,60 @@ const EventManager = () => {
     if (file) {
       setFormData({ ...formData, image: file });
       setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleBackgroundImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEventBackgroundImage(file);
+      setBackgroundImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleBackgroundImageSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const formDataToSend = new FormData();
+    if (eventBackgroundImage) {
+      formDataToSend.append("event_background_image", eventBackgroundImage);
+    }
+    
+    // Include existing about content to preserve other fields
+    if (aboutContent) {
+      formDataToSend.append("hero_title", aboutContent.hero_title || "");
+      formDataToSend.append("hero_tagline", aboutContent.hero_tagline || "");
+      formDataToSend.append("history_title", aboutContent.history_title || "");
+      formDataToSend.append("history_text", aboutContent.history_text || "");
+      formDataToSend.append("vision_title", aboutContent.vision_title || "");
+      formDataToSend.append("vision_text", aboutContent.vision_text || "");
+      formDataToSend.append("mission_title", aboutContent.mission_title || "");
+      formDataToSend.append("mission_text", aboutContent.mission_text || "");
+      formDataToSend.append("values", JSON.stringify(aboutContent.values || []));
+      formDataToSend.append("member_benefits", JSON.stringify(aboutContent.member_benefits || []));
+      formDataToSend.append("member_registration_link", aboutContent.member_registration_link || "");
+      formDataToSend.append("management", JSON.stringify(aboutContent.management || []));
+      formDataToSend.append("contact_phone", aboutContent.contact_phone || "");
+      formDataToSend.append("contact_email", aboutContent.contact_email || "");
+      formDataToSend.append("contact_address", aboutContent.contact_address || "");
+    }
+
+    try {
+      await dispatch(updateAbout(formDataToSend)).unwrap();
+      toast({
+        title: "Berhasil",
+        description: "Background image halaman Event berhasil diperbarui",
+      });
+      setShowBackgroundForm(false);
+      setEventBackgroundImage(null);
+      setBackgroundImagePreview(null);
+      dispatch(fetchAbout());
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Gagal menyimpan background image",
+        variant: "destructive",
+      });
     }
   };
 
@@ -125,13 +185,85 @@ const EventManager = () => {
   return (
     <AdminLayout>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Kelola Event</h1>
-        <div className="mb-6">
-          <Button onClick={() => setShowForm(!showForm)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Tambah Event
-          </Button>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Kelola Event</h1>
+          <div className="flex gap-2">
+            <Button onClick={() => setShowBackgroundForm(!showBackgroundForm)} variant="outline">
+              <ImageIcon className="w-4 h-4 mr-2" />
+              Atur Background Image
+            </Button>
+            <Button onClick={() => setShowForm(!showForm)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Tambah Event
+            </Button>
+          </div>
         </div>
+
+        {/* Background Image Form */}
+        {showBackgroundForm && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-8"
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Background Image Halaman Event</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleBackgroundImageSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="event_background_image">Background Image (untuk Hero Banner)</Label>
+                    <Input
+                      id="event_background_image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBackgroundImageChange}
+                    />
+                    {aboutContent?.event_background_image && !backgroundImagePreview && (
+                      <div className="mt-4">
+                        <p className="text-sm text-muted-foreground mb-2">Background Image Saat Ini:</p>
+                        <img
+                          src={aboutContent.event_background_image}
+                          alt="Current Background"
+                          className="w-full h-48 object-cover rounded"
+                        />
+                      </div>
+                    )}
+                    {backgroundImagePreview && (
+                      <div className="mt-4">
+                        <p className="text-sm text-muted-foreground mb-2">Preview:</p>
+                        <img
+                          src={backgroundImagePreview}
+                          alt="Background Preview"
+                          className="w-full h-48 object-cover rounded"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button type="submit" disabled={loading}>
+                      {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                      Simpan Background Image
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => {
+                        setShowBackgroundForm(false);
+                        setEventBackgroundImage(null);
+                        setBackgroundImagePreview(null);
+                      }}
+                    >
+                      Batal
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {showForm && (
           <motion.div
@@ -195,7 +327,7 @@ const EventManager = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="image">Gambar</Label>
+                    <Label htmlFor="image">Gambar Event</Label>
                     <Input
                       id="image"
                       type="file"

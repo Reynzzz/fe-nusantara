@@ -8,13 +8,16 @@ import { Calendar, MapPin, Users, ExternalLink, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchEvents } from "@/store/slices/eventsSlice";
+import { fetchAbout } from "@/store/slices/aboutSlice";
 
 const Event = () => {
   const dispatch = useAppDispatch();
   const { events, loading } = useAppSelector((state) => state.events);
+  const { content: aboutContent } = useAppSelector((state) => state.about);
 
   useEffect(() => {
     dispatch(fetchEvents());
+    dispatch(fetchAbout());
   }, [dispatch]);
 
   // Separate upcoming and past events
@@ -23,6 +26,11 @@ const Event = () => {
     (event) => new Date(event.date) >= now
   );
   const pastEvents = events.filter((event) => new Date(event.date) < now);
+  
+  // Get background image from about content, or default
+  const backgroundImage = aboutContent?.event_background_image 
+    ? aboutContent.event_background_image
+    : "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1600";
 
   const handleRegisterClick = (link?: string) => {
     const googleFormUrl = link || "https://forms.gle/example";
@@ -48,7 +56,7 @@ const Event = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/50 z-10" />
           <img
-            src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1600"
+            src={backgroundImage}
             alt="Event Banner"
             className="w-full h-full object-cover"
           />

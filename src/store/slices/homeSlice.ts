@@ -8,6 +8,9 @@ export interface HomeContent {
     bg_video: string | null;
     about_image: string | null;
     cta_image: string | null;
+    active_members: string | null;
+    events_count: string | null;
+    awards_count: string | null;
     createdAt?: string;
     updatedAt?: string;
 }

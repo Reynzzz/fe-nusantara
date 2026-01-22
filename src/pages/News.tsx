@@ -196,45 +196,46 @@ const News = () => {
       <Footer />
 
       {/* Dialog for News Detail */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl">
-          {selectedNews && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{selectedNews.title}</DialogTitle>
-                <DialogDescription>
-                  {new Date(selectedNews.date).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </DialogDescription>
-              </DialogHeader>
-              {selectedNews.image && (
-                <img
-                  src={selectedNews.image}
-                  alt={selectedNews.title}
-                  className="w-full h-64 object-cover my-4 rounded-md"
-                />
-              )}
-              <p className="text-muted-foreground">{selectedNews.content}</p>
-              {selectedNews.external_link && (
-                <div className="mt-4">
-                  <a
-                    href={selectedNews.external_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center text-gold hover:underline"
-                  >
-                    Baca selengkapnya di sumber asli <ArrowRight className="ml-2" size={16} />
-                  </a>
-                </div>
-              )}
-              <DialogClose className="mt-4 btn btn-sm">Tutup</DialogClose>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+    {/* Dialog for News Detail */}
+<Dialog open={open} onOpenChange={setOpen}>
+  <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+    {selectedNews && (
+      <>
+        <DialogHeader>
+          <DialogTitle>{selectedNews.title}</DialogTitle>
+          <DialogDescription>
+            {new Date(selectedNews.date).toLocaleDateString("id-ID", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </DialogDescription>
+        </DialogHeader>
+        {selectedNews.image && (
+          <img
+            src={selectedNews.image}
+            alt={selectedNews.title}
+            className="w-full h-64 object-cover my-4 rounded-md"
+          />
+        )}
+        <p className="text-muted-foreground">{selectedNews.content}</p>
+        {selectedNews.external_link && (
+          <div className="mt-4">
+            <a
+              href={selectedNews.external_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-gold hover:underline"
+            >
+              Baca selengkapnya di sumber asli <ArrowRight className="ml-2" size={16} />
+            </a>
+          </div>
+        )}
+        <DialogClose className="mt-4 btn btn-sm">Tutup</DialogClose>
+      </>
+    )}
+  </DialogContent>
+</Dialog>
     </motion.div>
   );
 };

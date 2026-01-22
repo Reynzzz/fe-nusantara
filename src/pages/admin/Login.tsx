@@ -16,7 +16,7 @@ const AdminLogin = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (username === "admin" && password === "admin12345") {
+    if (username === "admin" && password === "nmc@170225!") {
       localStorage.setItem("adminAuth", "true");
       toast({
         title: "Login berhasil",

@@ -8,6 +8,8 @@ export interface Milestone {
   description: string;
   achievements: string[];
   image: string | null;
+  event_tahunan?: string | null;
+  perhargaan?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

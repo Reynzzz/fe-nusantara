@@ -21,8 +21,10 @@ import ProductManager from "./pages/admin/ProductManager";
 import AboutManager from "./pages/admin/AboutManager";
 import GalleryManager from "./pages/admin/GalleryManager";
 import MilestoneManager from "./pages/admin/MilestoneManager";
+import MilestoneStatsManager from "./pages/admin/MilestoneStatsManager";
 import HomeManager from "./pages/admin/HomeManager";
 import CategoryManager from "./pages/admin/CategoryManager";
+import MemberManager from "./pages/admin/MemberManager";
 
 const App = () => (
   <Provider store={store}>
@@ -50,7 +52,9 @@ const App = () => (
           <Route path="/admin/about" element={<AboutManager />} />
           <Route path="/admin/gallery" element={<GalleryManager />} />
           <Route path="/admin/milestones" element={<MilestoneManager />} />
+          <Route path="/admin/milestone-stats" element={<MilestoneStatsManager />} />
           <Route path="/admin/home" element={<HomeManager />} />
+          <Route path="/admin/members" element={<MemberManager />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -6,13 +6,16 @@ import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchMilestones } from "@/store/slices/milestoneSlice";
+import { fetchMilestoneStats } from "@/store/slices/milestoneStatsSlice";
 
 const Milestone = () => {
   const dispatch = useAppDispatch();
   const { items: milestones, loading } = useAppSelector((state) => state.milestones);
+  const { data: milestoneStats, loading: statsLoading } = useAppSelector((state) => state.milestoneStats);
 
   useEffect(() => {
     dispatch(fetchMilestones());
+    dispatch(fetchMilestoneStats());
   }, [dispatch]);
 
   const stats = useMemo(() => {
@@ -20,11 +23,14 @@ const Milestone = () => {
       (sum, item) => sum + (item.achievements?.length || 0),
       0
     );
+    
     return {
       totalYears: milestones.length,
       totalAchievements,
+      eventTahunan: milestoneStats?.event_tahunan || "50+",
+      perhargaan: milestoneStats?.perhargaan || "25+",
     };
-  }, [milestones]);
+  }, [milestones, milestoneStats]);
 
   const icons = [Trophy, Users, Calendar, Heart];
 
@@ -184,7 +190,7 @@ const Milestone = () => {
             >
               <Card className="bg-background border-gold">
               <CardContent className="pt-6 text-center">
-                <h3 className="text-4xl font-bold text-gold mb-2">50+</h3>
+                <h3 className="text-4xl font-bold text-gold mb-2">{stats.eventTahunan || "-"}</h3>
                 <p className="text-muted-foreground">Event Tahunan</p>
               </CardContent>
             </Card>
@@ -197,7 +203,7 @@ const Milestone = () => {
             >
               <Card className="bg-background border-gold">
               <CardContent className="pt-6 text-center">
-                <h3 className="text-4xl font-bold text-gold mb-2">25+</h3>
+                <h3 className="text-4xl font-bold text-gold mb-2">{stats.perhargaan || "-"}</h3>
                 <p className="text-muted-foreground">Penghargaan</p>
               </CardContent>
             </Card>

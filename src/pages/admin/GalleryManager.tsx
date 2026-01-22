@@ -4,44 +4,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, ImageIcon, Video, Play } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { galleryAPI, getImageUrl } from "@/services/api";
+import { YouTubeEmbed } from "react-social-media-embed";
+import { InstagramEmbed } from "react-social-media-embed";
+import { TikTokEmbed } from "react-social-media-embed";
 
 interface GalleryItem {
   id: number;
   title: string;
-  type: "image" | "video";
+  type: "image" | "video" | "embed";
   url: string;
   thumbnailUrl: string | null;
   description: string | null;
   createdAt: string;
 }
 
-const getYouTubeId = (url: string): string | null => {
-  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-  return match ? match[1] : null;
-};
-
-const getYouTubeThumbnail = (url: string): string => {
-  const videoId = getYouTubeId(url);
-  return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : "";
-};
-
 const GalleryManager = () => {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+
   const [formData, setFormData] = useState({
     title: "",
-    type: "image" as "image" | "video",
+    type: "image" as "image" | "video" | "embed",
     url: "",
     thumbnailUrl: "",
     description: "",
   });
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,54 +44,44 @@ const GalleryManager = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await galleryAPI.getAll();
-      setItems((response?.data || []) as GalleryItem[]);
-    } catch (error) {
-      console.error(error);
+      const res = await galleryAPI.getAll();
+      setItems(res.data || []);
+    } catch {
       toast({ title: "Error", description: "Gagal memuat galeri", variant: "destructive" });
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const payload = new FormData();
     payload.append("title", formData.title);
     payload.append("type", formData.type);
     if (formData.description) payload.append("description", formData.description);
 
-    if (formData.type === "video") {
-      payload.append("url", formData.url);
-      if (formData.thumbnailUrl) payload.append("thumbnailUrl", formData.thumbnailUrl);
-    } else {
+    if (formData.type === "image") {
       if (!editingItem && !imageFile) {
-        toast({ title: "Error", description: "Unggah gambar untuk tipe foto", variant: "destructive" });
+        toast({ title: "Error", description: "Upload gambar wajib", variant: "destructive" });
         return;
       }
-      if (imageFile) {
-        payload.append("image", imageFile);
-      }
+      if (imageFile) payload.append("image", imageFile);
+    } else {
+      payload.append("url", formData.url);
+      if (formData.thumbnailUrl) payload.append("thumbnailUrl", formData.thumbnailUrl);
     }
 
     try {
       if (editingItem) {
-        const response = await galleryAPI.update(editingItem.id, payload);
-        if (!response?.success) {
-          throw new Error(response?.message || "Gagal mengupdate item");
-        }
-        toast({ title: "Berhasil", description: "Item berhasil diupdate" });
+        await galleryAPI.update(editingItem.id, payload);
+        toast({ title: "Berhasil diupdate" });
       } else {
-        const response = await galleryAPI.create(payload);
-        if (!response?.success) {
-          throw new Error(response?.message || "Gagal menambahkan item");
-        }
-        toast({ title: "Berhasil", description: "Item berhasil ditambahkan" });
+        await galleryAPI.create(payload);
+        toast({ title: "Berhasil ditambahkan" });
       }
-
       resetForm();
       fetchItems();
-    } catch (error) {
-      console.error(error);
-      toast({ title: "Error", description: "Operasi gagal, coba lagi", variant: "destructive" });
+    } catch {
+      toast({ title: "Error", description: "Gagal menyimpan", variant: "destructive" });
     }
   };
 
@@ -110,7 +94,6 @@ const GalleryManager = () => {
       thumbnailUrl: item.thumbnailUrl || "",
       description: item.description || "",
     });
-    setImageFile(null);
     setIsEditing(true);
   };
 
@@ -118,41 +101,61 @@ const GalleryManager = () => {
     if (!confirm("Yakin ingin menghapus item ini?")) return;
 
     try {
-      const response = await galleryAPI.delete(id);
-      if (!response?.success) {
-        throw new Error(response?.message || "Gagal menghapus");
-      }
-      toast({ title: "Berhasil", description: "Item berhasil dihapus" });
+      await galleryAPI.delete(id);
+      toast({ title: "Berhasil dihapus" });
       fetchItems();
-    } catch (error) {
-      console.error(error);
-      toast({ title: "Error", description: "Gagal menghapus item", variant: "destructive" });
+    } catch {
+      toast({ title: "Error", description: "Gagal menghapus", variant: "destructive" });
     }
   };
 
   const resetForm = () => {
-    setFormData({
-      title: "",
-      type: "image",
-      url: "",
-      thumbnailUrl: "",
-      description: "",
-    });
+    setFormData({ title: "", type: "image", url: "", thumbnailUrl: "", description: "" });
     setImageFile(null);
     setEditingItem(null);
     setIsEditing(false);
   };
 
+  const renderEmbed = (item: GalleryItem) => {
+    const url = item.url;
+
+    // YouTube
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      return (
+        <div className="w-full h-full flex items-center justify-center">
+          <YouTubeEmbed url={url} width="100%" height="100%" />
+        </div>
+      );
+    }
+
+    // Instagram
+    if (url.includes("instagram.com")) {
+      return (
+        <div className="w-full h-full flex items-center justify-center overflow-auto">
+          <InstagramEmbed url={url} width="100%" />
+        </div>
+      );
+    }
+
+    // TikTok
+    if (url.includes("tiktok.com")) {
+      return (
+        <div className="w-full h-full flex items-center justify-center overflow-auto">
+          <TikTokEmbed url={url} width="100%" />
+        </div>
+      );
+    }
+
+    return <div className="text-white text-center p-4">URL tidak didukung</div>;
+  };
+
   return (
     <AdminLayout>
-      <div className="space-y-6 p-5">
+      <div className="p-5 space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Kelola Galeri</h1>
+          <h1 className="text-3xl font-bold">Gallery Manager</h1>
           {!isEditing && (
-            <Button onClick={() => setIsEditing(true)} className="bg-gold hover:bg-gold-dark text-background">
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah Item
-            </Button>
+            <Button onClick={() => setIsEditing(true)}>Tambah</Button>
           )}
         </div>
 
@@ -162,106 +165,57 @@ const GalleryManager = () => {
               {editingItem ? "Edit Item" : "Tambah Item Baru"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Judul</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Judul galeri"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="type">Tipe</Label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(value: "image" | "video") => setFormData({ ...formData, type: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="image">
-                        <div className="flex items-center gap-2">
-                          <ImageIcon className="w-4 h-4" />
-                          Foto
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="video">
-                        <div className="flex items-center gap-2">
-                          <Video className="w-4 h-4" />
-                          Video YouTube
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="url">
-                  {formData.type === "video" ? "URL YouTube" : "Unggah Gambar"}
-                </Label>
-                  {formData.type === "video" ? (
-                    <>
-                      <Input
-                        id="url"
-                        value={formData.url}
-                        onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                        placeholder="https://www.youtube.com/watch?v=xxxxx"
-                        required
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Masukkan URL YouTube (contoh: https://www.youtube.com/watch?v=xxxxx atau https://youtu.be/xxxxx)
-                      </p>
-                    </>
-                  ) : (
-                    <div className="space-y-2">
-                      <Input
-                        id="image"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                        required={!editingItem}
-                      />
-                      {editingItem?.type === "image" && (
-                        <p className="text-xs text-muted-foreground">
-                          Biarkan kosong jika tidak ingin mengganti gambar.
-                        </p>
-                      )}
-                    </div>
-                  )}
-              </div>
+              <Input
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Judul"
+                required
+              />
 
-              {formData.type === "video" && (
-                <div className="space-y-2">
-                  <Label htmlFor="thumbnail_url">URL Thumbnail</Label>
+              <Select
+                value={formData.type}
+                onValueChange={(v: any) => setFormData({ ...formData, type: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="image">Foto</SelectItem>
+                  <SelectItem value="video">YouTube</SelectItem>
+                  <SelectItem value="embed">IG / TikTok / Shorts</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {formData.type === "image" ? (
+                <div>
                   <Input
-                  id="thumbnail_url"
-                  value={formData.thumbnailUrl}
-                  onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
-                    placeholder="Kosongkan untuk menggunakan thumbnail YouTube otomatis"
+                    type="file"
+                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                    accept="image/*"
                   />
+                  {editingItem && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Kosongkan jika tidak ingin mengubah gambar
+                    </p>
+                  )}
                 </div>
+              ) : (
+                <Input
+                  placeholder="Paste URL (YouTube, Instagram, TikTok)"
+                  value={formData.url}
+                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                  required
+                />
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Deskripsi (opsional)</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Deskripsi singkat"
-                  rows={3}
-                />
-              </div>
+              <Textarea
+                placeholder="Deskripsi (opsional)"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
 
               <div className="flex gap-2">
-                <Button type="submit" className="bg-gold hover:bg-gold-dark text-background">
-                  {editingItem ? "Update" : "Simpan"}
-                </Button>
+                <Button type="submit">{editingItem ? "Update" : "Simpan"}</Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Batal
                 </Button>
@@ -270,52 +224,37 @@ const GalleryManager = () => {
           </Card>
         )}
 
-        {/* Gallery Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* GRID */}
+        <div className="grid md:grid-cols-3 gap-4">
           {items.map((item) => (
             <Card key={item.id} className="overflow-hidden">
-              <div className="relative aspect-video bg-muted">
-                <img
-                  src={item.type === "video" 
-                    ? (item.thumbnailUrl ? getImageUrl(item.thumbnailUrl) : getYouTubeThumbnail(item.url))
-                    : getImageUrl(item.url)
-                  }
-                  alt={item.title}
-                  className="w-full h-full object-cover"
-                />
-                {item.type === "video" && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 bg-red-600/90 rounded-full flex items-center justify-center">
-                      <Play className="w-6 h-6 text-white ml-1" fill="currentColor" />
-                    </div>
-                  </div>
+              <div className="aspect-video bg-black relative">
+                {item.type === "image" ? (
+                  <img
+                    src={getImageUrl(item.url)}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  renderEmbed(item)
                 )}
-                <div className="absolute top-2 left-2">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    item.type === "video" 
-                      ? "bg-red-500 text-white" 
-                      : "bg-gold text-background"
-                  }`}>
-                    {item.type === "video" ? "Video" : "Foto"}
-                  </span>
-                </div>
               </div>
-              <div className="p-4">
-                <h3 className="font-semibold mb-1">{item.title}</h3>
+              <div className="p-3">
+                <div className="font-semibold mb-2">{item.title}</div>
                 {item.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{item.description}</p>
+                  <p className="text-sm text-gray-600 mb-3">{item.description}</p>
                 )}
                 <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => handleEdit(item)}
                   >
                     <Pencil className="w-4 h-4 mr-1" />
                     Edit
                   </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="destructive"
                     onClick={() => handleDelete(item.id)}
                   >
@@ -327,16 +266,6 @@ const GalleryManager = () => {
             </Card>
           ))}
         </div>
-
-        {items.length === 0 && !isEditing && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">Belum ada item di galeri</p>
-            <Button onClick={() => setIsEditing(true)} className="bg-gold hover:bg-gold-dark text-background">
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah Item Pertama
-            </Button>
-          </div>
-        )}
       </div>
     </AdminLayout>
   );

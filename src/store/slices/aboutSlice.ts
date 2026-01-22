@@ -31,6 +31,7 @@ export interface AboutContent {
   contact_phone: string;
   contact_email: string;
   contact_address: string;
+  event_background_image: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -76,6 +77,9 @@ const aboutSlice = createSlice({
           history_image_url: action.payload.history_image_url
             ? getImageUrl(action.payload.history_image_url)
             : null,
+          event_background_image: action.payload.event_background_image
+            ? getImageUrl(action.payload.event_background_image)
+            : null,
           management: (action.payload.management || []).map((member: Management) => ({
             ...member,
             photo_url: member?.photo_url ? getImageUrl(member.photo_url) : null,
@@ -97,6 +101,9 @@ const aboutSlice = createSlice({
           ...action.payload,
           history_image_url: action.payload.history_image_url
             ? getImageUrl(action.payload.history_image_url)
+            : null,
+          event_background_image: action.payload.event_background_image
+            ? getImageUrl(action.payload.event_background_image)
             : null,
           management: (action.payload.management || []).map((member: Management) => ({
             ...member,

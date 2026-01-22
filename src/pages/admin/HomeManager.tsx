@@ -39,6 +39,9 @@ const HomeManager = () => {
             const formData = new FormData();
             formData.append("hero_title", localContent.hero_title || "");
             formData.append("hero_tagline", localContent.hero_tagline || "");
+            formData.append("active_members", localContent.active_members || "");
+            formData.append("events_count", localContent.events_count || "");
+            formData.append("awards_count", localContent.awards_count || "");
             if (bgVideoFile) {
                 formData.append("bg_video", bgVideoFile);
             }
@@ -64,12 +67,27 @@ const HomeManager = () => {
             setSaving(false);
         }
     };
+    // console.log();
+const MAX_SIZE = 50 * 1024 * 1024; 
 
-    const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setBgVideoFile(e.target.files[0]);
-        }
-    };
+const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (file.size > MAX_SIZE) {
+    toast({
+      variant: "destructive",
+      title: "Video terlalu besar",
+      description: "Ukuran video maksimal 50 MB",
+    });
+
+    e.target.value = ""; 
+    return;
+  }
+
+  setBgVideoFile(file);
+};
+
 
     const handleAboutImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -131,7 +149,7 @@ const HomeManager = () => {
                                     placeholder="Bergabunglah dengan komunitas..."
                                 />
                             </div>
-                            {/* <div>
+                            <div>
                                 <Label htmlFor="bg_video">Background Video</Label>
                                 <Input
                                     id="bg_video"
@@ -144,7 +162,7 @@ const HomeManager = () => {
                                         Video saat ini tersedia (Upload baru untuk mengganti)
                                     </p>
                                 )}
-                            </div> */}
+                            </div>
                         </div>
                     </Card>
 
@@ -169,6 +187,54 @@ const HomeManager = () => {
                                         />
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card className="p-6 mt-6">
+                        <h2 className="text-xl font-semibold mb-4">Statistics Section</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <Label htmlFor="active_members">Active Members</Label>
+                                <Input
+                                    id="active_members"
+                                    value={localContent?.active_members || ""}
+                                    onChange={(e) =>
+                                        setLocalContent({ ...localContent, active_members: e.target.value })
+                                    }
+                                    placeholder="500+"
+                                />
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Contoh: 500+, 1000+, dll
+                                </p>
+                            </div>
+                            <div>
+                                <Label htmlFor="events_count">Events per Year</Label>
+                                <Input
+                                    id="events_count"
+                                    value={localContent?.events_count || ""}
+                                    onChange={(e) =>
+                                        setLocalContent({ ...localContent, events_count: e.target.value })
+                                    }
+                                    placeholder="50+"
+                                />
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Contoh: 50+, 100+, dll
+                                </p>
+                            </div>
+                            <div>
+                                <Label htmlFor="awards_count">Awards Won</Label>
+                                <Input
+                                    id="awards_count"
+                                    value={localContent?.awards_count || ""}
+                                    onChange={(e) =>
+                                        setLocalContent({ ...localContent, awards_count: e.target.value })
+                                    }
+                                    placeholder="25+"
+                                />
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Contoh: 25+, 50+, dll
+                                </p>
                             </div>
                         </div>
                     </Card>

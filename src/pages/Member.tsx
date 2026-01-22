@@ -1,17 +1,20 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
-import { Users, CheckCircle2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect } from "react";
 import { fetchAbout } from "@/store/slices/aboutSlice";
+import { fetchMembers } from "@/store/slices/memberSlice";
+import { Loader2, User } from "lucide-react";
 
 const Member = () => {
   const dispatch = useAppDispatch();
   const { content: aboutContent } = useAppSelector((state) => state.about);
+  const { members, loading } = useAppSelector((state) => state.members);
 
   useEffect(() => {
     dispatch(fetchAbout());
+    dispatch(fetchMembers());
   }, [dispatch]);
 
   // Google Form terbaru
@@ -19,56 +22,58 @@ const Member = () => {
     aboutContent?.member_registration_link ||
     "https://docs.google.com/forms/d/e/1FAIpQLSf6cFzWrYCfuCNO2qq6mEL2Qx3JElqM5JFpdJ0yQ25SzUetUg/viewform";
 
-  const defaultBenefits = [
-    "Akses ke semua event club",
-    "Diskon khusus di merchandise shop",
-    "Networking dengan member lainnya",
-    "Update berita dan informasi terbaru",
-    "Kesempatan riding bersama",
-    "Dukungan komunitas yang solid",
-  ];
-
-  const benefits =
-    aboutContent?.member_benefits && aboutContent.member_benefits.length > 0
-      ? aboutContent.member_benefits
-      : defaultBenefits;
-
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
       <main className="pt-24 pb-16">
-        {/* Hero Section */}
-        <section className="container mx-auto px-4 mb-16">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gold/10 rounded-full mb-6">
-              <Users className="w-10 h-10 text-gold" />
-            </div>
+        {/* Member List Section */}
+        <section className="container mx-auto px-4 mb-20">
+          <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Bergabung dengan Kami
+              Member Kami
             </h1>
-            <p className="text-lg text-muted-foreground">
-              Jadilah bagian dari komunitas pengendara motor yang solid dan penuh passion.
-              Daftar sekarang dan nikmati berbagai keuntungan eksklusif!
+            <p className="text-muted-foreground text-lg">
+              Inilah para member yang tergabung dalam komunitas kami
             </p>
           </div>
-        </section>
 
-        {/* Benefits Section */}
-        <section className="container mx-auto px-4 mb-16">
-          <Card className="p-8 bg-card border-border">
-            <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
-              Keuntungan Member
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <CheckCircle2 className="w-6 h-6 text-gold flex-shrink-0 mt-1" />
-                  <p className="text-foreground">{benefit}</p>
-                </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-gold" />
+            </div>
+          ) : members.length === 0 ? (
+            <div className="text-center py-12">
+              <User className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground text-lg">Belum ada member yang terdaftar</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {members.map((member) => (
+                <Card
+                  key={member.id}
+                  className="p-4 text-center bg-card border-border hover:shadow-lg transition"
+                >
+                  <div className="w-32 h-32 mx-auto mb-4 overflow-hidden rounded-full">
+                    {member.photo ? (
+                      <img
+                        src={member.photo}
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <User className="w-12 h-12 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {member.name}
+                  </h3>
+                </Card>
               ))}
             </div>
-          </Card>
+          )}
         </section>
 
         {/* Registration Redirect Button */}
@@ -80,7 +85,7 @@ const Member = () => {
 
             <Card className="p-8 bg-card border-border">
               <p className="text-muted-foreground mb-6">
-                Klik tombol di bawah ini untuk membuka formulir pendaftaran.
+                Klik tombol di bawah ini untuk membuka formulir pendaftaran member baru.
               </p>
 
               <a

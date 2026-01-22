@@ -25,13 +25,13 @@ const Home = () => {
   }, [dispatch]);
 
   const stats = [
-    { icon: Users, value: "500+", label: "Active Members" },
-    { icon: Calendar, value: "50+", label: "Events per Year" },
-    { icon: Trophy, value: "25+", label: "Awards Won" },
+    { icon: Users, value: homeContent?.active_members || "500+", label: "Active Members" },
+    { icon: Calendar, value: homeContent?.events_count || "50+", label: "Events per Year" },
+    { icon: Trophy, value: homeContent?.awards_count || "25+", label: "Awards Won" },
   ];
 
   const latestNews = news.slice(0, 3);
-
+console.log(homeContent)
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -48,14 +48,19 @@ const Home = () => {
         transition={{ duration: 0.6, delay: 0.2 }}
         className="relative h-screen flex items-center justify-center overflow-hidden"
       >
-        <video
-          src={VIDEOBACKGROUND}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-        />
+      <video
+  autoPlay
+  loop
+  muted
+  playsInline
+  className="w-full h-full object-cover"
+  src={
+    homeContent?.bg_video && homeContent.bg_video.trim() !== ""
+      ? homeContent.bg_video
+      : VIDEOBACKGROUND
+  }
+/>
+
         <div className="absolute inset-0 bg-black/40 z-10 flex flex-col items-center justify-center px-4 text-center" />
 
       </motion.section>

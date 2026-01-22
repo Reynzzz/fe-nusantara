@@ -4,14 +4,14 @@ import MainLogo from '@/assets/Logo_NMC.png'
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  const quickLinks = [
-    { to: "/", label: "Home" },
-    { to: "/tentang", label: "Tentang" },
-    { to: "/news", label: "News" },
-    { to: "/event", label: "Event" },
-    { to: "/shop", label: "Shop" },
-    { to: "/kontak", label: "Kontak" },
-  ];
+const quickLinks = [
+  { to: "/", label: "Home" },
+  { to: "/tentang", label: "Tentang" },
+  { to: "/news", label: "News" },
+  { to: "/event", label: "Event" },
+  { to: "/shop", label: "Shop" },
+  { to: "/tentang#kontak", label: "Kontak" },
+];
 
   const socialLinks = [
     { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
@@ -34,7 +34,10 @@ const Footer = () => {
           </Link>
             </div>
             <p className="text-muted-foreground text-sm">
-              Komunitas penggemar motor yang solid, penuh semangat, dan saling mendukung.
+             Nusantara Motoriders (NMC) adalah komunitas motor yang lahir dari semangat riding, kebersamaan, dan kepedulian terhadap alam.
+Kami menikmati setiap perjalanan dari touring dekat hingga jauh yang selalu menjunjung brotherhood, safety riding, dan aksi nyata peduli lingkungan.
+
+<p>NMC - Ride for Green Indonesia</p>
             </p>
           </div>
 

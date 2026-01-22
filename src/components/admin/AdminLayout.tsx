@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Newspaper, Calendar, ShoppingBag, LogOut, Users, Image, Flag } from "lucide-react";
+import { Home, Newspaper, Calendar, ShoppingBag, LogOut, Users, Image, Flag, Trophy } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,15 +26,40 @@ const menuItems = [
     url: "/admin/home",
     icon: Home,
   },
+   {
+    title: "Halaman Tentang",
+    url: "/admin/about",
+    icon: Users,
+  },
+   {
+    title: "Kelola Milestone",
+    url: "/admin/milestones",
+    icon: Flag,
+  },
+   {
+    title: "Statistik Milestone",
+    url: "/admin/milestone-stats",
+    icon: Trophy,
+  },
   {
     title: "Kelola News",
     url: "/admin/news",
     icon: Newspaper,
   },
+    {
+    title: "Kelola Galeri",
+    url: "/admin/gallery",
+    icon: Image,
+  },
   {
     title: "Kelola Event",
     url: "/admin/events",
     icon: Calendar,
+  },
+    {
+    title: "Kategori Produk",
+    url: "/admin/categories",
+    icon: Flag,
   },
   {
     title: "Kelola Produk",
@@ -42,25 +67,14 @@ const menuItems = [
     icon: ShoppingBag,
   },
   {
-    title: "Kategori Produk",
-    url: "/admin/categories",
-    icon: Flag,
-  },
-  {
-    title: "Halaman Tentang",
-    url: "/admin/about",
+    title: "Kelola Member",
+    url: "/admin/members",
     icon: Users,
   },
-  {
-    title: "Kelola Galeri",
-    url: "/admin/gallery",
-    icon: Image,
-  },
-  {
-    title: "Kelola Milestone",
-    url: "/admin/milestones",
-    icon: Flag,
-  },
+
+ 
+
+ 
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

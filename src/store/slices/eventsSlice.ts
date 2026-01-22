@@ -9,6 +9,7 @@ export interface Event {
   location: string;
   registration_link: string | null;
   image: string | null;
+  background_image: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -70,6 +71,7 @@ const eventsSlice = createSlice({
         state.events = action.payload.map((event: Event) => ({
           ...event,
           image: event.image ? getImageUrl(event.image) : null,
+          background_image: event.background_image ? getImageUrl(event.background_image) : null,
         }));
       })
       .addCase(fetchEvents.rejected, (state, action) => {
@@ -86,6 +88,7 @@ const eventsSlice = createSlice({
         const newEvent = {
           ...action.payload,
           image: action.payload.image ? getImageUrl(action.payload.image) : null,
+          background_image: action.payload.background_image ? getImageUrl(action.payload.background_image) : null,
         };
         state.events.unshift(newEvent);
       })
@@ -105,6 +108,7 @@ const eventsSlice = createSlice({
           state.events[index] = {
             ...action.payload,
             image: action.payload.image ? getImageUrl(action.payload.image) : null,
+            background_image: action.payload.background_image ? getImageUrl(action.payload.background_image) : null,
           };
         }
       })

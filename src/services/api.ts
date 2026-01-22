@@ -1,5 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL||'http://localhost:3000/api';
-console.log(API_BASE_URL);
+// console.log(API_BASE_URL);
 
 
 // Helper function untuk fetch API
@@ -152,6 +152,17 @@ export const milestonesAPI = {
   delete: (id: number) => apiRequest(`/milestones/${id}`, { method: 'DELETE' }),
 };
 
+// Milestone Stats API
+export const milestoneStatsAPI = {
+  get: () => apiRequest('/milestone-stats'),
+  update: (data: { event_tahunan: string; perhargaan: string }) => {
+    return apiRequest('/milestone-stats', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+};
+
 // Home API
 export const homeAPI = {
   get: () => apiRequest('/home'),
@@ -161,6 +172,25 @@ export const homeAPI = {
       body: formData,
     }).then(res => res.json());
   },
+};
+
+// Members API
+export const membersAPI = {
+  getAll: () => apiRequest('/members'),
+  getById: (id: number) => apiRequest(`/members/${id}`),
+  create: (formData: FormData) => {
+    return fetch(`${API_BASE_URL}/members`, {
+      method: 'POST',
+      body: formData,
+    }).then(res => res.json());
+  },
+  update: (id: number, formData: FormData) => {
+    return fetch(`${API_BASE_URL}/members/${id}`, {
+      method: 'PUT',
+      body: formData,
+    }).then(res => res.json());
+  },
+  delete: (id: number) => apiRequest(`/members/${id}`, { method: 'DELETE' }),
 };
 
 // Helper untuk mendapatkan full image URL
