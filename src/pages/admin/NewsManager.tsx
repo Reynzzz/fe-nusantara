@@ -111,7 +111,7 @@ const NewsManager = () => {
       resetForm();
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: error,
         description: error.message || "Gagal menyimpan berita",
         variant: "destructive",
       });
