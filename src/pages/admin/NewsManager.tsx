@@ -14,12 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Plus,
   Pencil,
@@ -38,12 +42,42 @@ import {
 } from "@/store/slices/newsSlice";
 import { useToast } from "@/hooks/use-toast";
 
+/* =======================
+   CONSTANT & VALIDATION
+======================= */
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const validateForm = (formData: any) => {
+  const errors: string[] = [];
+
+  if (!formData.title.trim()) errors.push("Judul wajib diisi");
+  if (!formData.excerpt.trim()) errors.push("Ringkasan wajib diisi");
+  if (!formData.content.trim()) errors.push("Konten wajib diisi");
+  if (!formData.date) errors.push("Tanggal wajib diisi");
+
+  if (formData.image) {
+    if (!formData.image.type.startsWith("image/")) {
+      errors.push("File harus berupa gambar");
+    }
+
+    if (formData.image.size > MAX_IMAGE_SIZE) {
+      errors.push("Ukuran gambar maksimal 5MB");
+    }
+  }
+
+  return errors;
+};
+
+/* =======================
+   COMPONENT
+======================= */
+
 const NewsManager = () => {
   const dispatch = useAppDispatch();
   const { news, loading } = useAppSelector((state) => state.news);
   const { toast } = useToast();
-  console.log(news);
-  
+
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
@@ -58,18 +92,45 @@ const NewsManager = () => {
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+  /* =======================
+     FETCH DATA
+  ======================= */
   useEffect(() => {
     dispatch(fetchNews());
   }, [dispatch]);
 
+  /* =======================
+     IMAGE HANDLER
+  ======================= */
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setFormData({ ...formData, image: file });
-      setImagePreview(URL.createObjectURL(file));
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "File tidak valid",
+        description: "Hanya file gambar yang diperbolehkan",
+        variant: "destructive",
+      });
+      return;
     }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast({
+        title: "Gambar terlalu besar",
+        description: "Ukuran gambar maksimal 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFormData({ ...formData, image: file });
+    setImagePreview(URL.createObjectURL(file));
   };
 
+  /* =======================
+     EDIT
+  ======================= */
   const handleEdit = (item: any) => {
     setEditId(item.id);
     setFormData({
@@ -84,8 +145,27 @@ const NewsManager = () => {
     setShowForm(true);
   };
 
+  /* =======================
+     SUBMIT
+  ======================= */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const errors = validateForm(formData);
+    if (errors.length > 0) {
+      toast({
+        title: "Validasi gagal",
+        description: (
+          <ul className="list-disc pl-4">
+            {errors.map((err, i) => (
+              <li key={i}>{err}</li>
+            ))}
+          </ul>
+        ),
+        variant: "destructive",
+      });
+      return;
+    }
 
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
@@ -93,6 +173,7 @@ const NewsManager = () => {
     formDataToSend.append("content", formData.content);
     formDataToSend.append("external_link", formData.external_link);
     formDataToSend.append("date", formData.date);
+
     if (formData.image) {
       formDataToSend.append("image", formData.image);
     }
@@ -107,17 +188,19 @@ const NewsManager = () => {
         await dispatch(createNews(formDataToSend)).unwrap();
         toast({ title: "Berhasil", description: "Berita ditambahkan" });
       }
-
       resetForm();
     } catch (error: any) {
       toast({
-        title: error,
+        title: "Error",
         description: error.message || "Gagal menyimpan berita",
         variant: "destructive",
       });
     }
   };
 
+  /* =======================
+     DELETE
+  ======================= */
   const handleDelete = async (id: number) => {
     if (!confirm("Yakin hapus berita ini?")) return;
 
@@ -147,6 +230,9 @@ const NewsManager = () => {
     setImagePreview(null);
   };
 
+  /* =======================
+     RENDER
+  ======================= */
   return (
     <AdminLayout>
       <div className="container mx-auto px-4 py-8">
@@ -158,10 +244,7 @@ const NewsManager = () => {
         </Button>
 
         {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Card className="my-6">
               <CardHeader>
                 <CardTitle>
@@ -178,7 +261,6 @@ const NewsManager = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, title: e.target.value })
                       }
-                      required
                     />
                   </div>
 
@@ -189,7 +271,6 @@ const NewsManager = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, excerpt: e.target.value })
                       }
-                      required
                     />
                   </div>
 
@@ -201,7 +282,6 @@ const NewsManager = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, content: e.target.value })
                       }
-                      required
                     />
                   </div>
 
@@ -218,8 +298,8 @@ const NewsManager = () => {
                     />
                   </div>
 
-                  {/* DATE PICKER BULAN ANGKA */}
-                  <div className="space-y-2">
+                  {/* DATE PICKER */}
+               <div className="space-y-2">
                     <Label>Tanggal</Label>
 
                     <Popover>
